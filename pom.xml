@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.fhg.fokus.net</groupId>
     <artifactId>pt_netview</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <name>Parent POM for Netview and Worldmap module</name>
+    <version>1.0-SNAPSHOT-plain</version>
+    <name>Parent POM for Netview</name>
     <packaging>pom</packaging>
 
     <properties>
