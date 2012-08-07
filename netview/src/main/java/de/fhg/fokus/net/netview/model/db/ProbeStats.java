@@ -67,60 +67,60 @@ public class ProbeStats implements Serializable {
 	 */
 	
 	@Id
-	private long uid;
+	public long uid;
 
 	/**
 	 * Observation Domain Id.
 	 */
 	@Column
-	private long oid;
+	public long oid;
 
 	/**
 	 * Export Timestamp.
 	 * 
 	 */
 	@Column
-	private long timestamp;
+	public long timestamp;
 
 	/**
 	 * System idle CPU, see "man mpstat" for more information.
 	 */
 	@Column
-	private float systemCpuIdle;
+	public float systemCpuIdle;
 
 	/**
 	 * System free memory in kilobytes, see "man pidstat" for more information.
 	 */
 	@Column
-	private long systemMemFree;
+	public long systemMemFree;
 
 	/**
 	 * percentage of CPU used in user level (application), see "man pidstat" for
 	 * more information"
 	 */
 	@Column
-	private float processCpuUser;
+	public float processCpuUser;
 
 	/**
 	 * percentage of CPU used in system level (kernel), see "man pidstat" for
 	 * more information"
 	 */
 	@Column
-	private float processCpuSys;
+	public float processCpuSys;
 
 	/**
 	 * the process virtual memory used in kilobytes, see "man pidstat" for more
 	 * information"
 	 */
 	@Column
-	private long processMemVzs;
+	public long processMemVzs;
 
 	/**
 	 * the process resident set size in kilobytes, see "man pidstat" for more
 	 * information"
 	 */
 	@Column
-	private long processMemRss;
+	public long processMemRss;
 
 
 	public ProbeStats() {

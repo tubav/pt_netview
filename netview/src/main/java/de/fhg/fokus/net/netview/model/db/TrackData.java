@@ -38,6 +38,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.fhg.fokus.net.netview.model.db;
 
 import javax.persistence.Column;
@@ -49,87 +50,87 @@ import de.fhg.fokus.net.ptapi.PacketTrackRecord;
 @Entity
 public class TrackData {
 
-    public TrackData() {
-    }
+	public TrackData() {
 
-    public TrackData(int uID, int trackID, long ruleID,
-            long start_ts, long stop_ts, int delay) {
-        this.uid = uID;
-        this.trackID = trackID;
-        this.ruleID = ruleID;
-        this.start_ts = start_ts;
-        this.stop_ts = stop_ts;
-        this.delay = delay;
-    }
+	}
 
-    public TrackData(PacketTrackRecord record) {
-        this.trackID = record.trackid;
-        this.start_ts = record.ts[0];
-        this.stop_ts = record.ts[record.ts.length - 1];
-        this.delay = record.ts[record.ts.length - 1] - record.ts[0];
-        this.ruleID = record.ruleId;
-    }
-    /**
-     * Unique Id
-     */
-    @Id
-    private int uid;
-    @Column
-    private int trackID;
-    @Column
-    private long ruleID;
-    @Column
-    private long start_ts;
-    @Column
-    private long stop_ts;
-    @Column
-    private long delay;
+	public TrackData(int uID, int trackID, long start_ts, long stop_ts, int delay) {
+		this.uid = uID;
+		this.trackID = trackID;
+		this.start_ts = start_ts;
+		this.stop_ts = stop_ts;
+		this.delay = delay;
+	}
+	
+	
+	public TrackData(PacketTrackRecord record){
+		this.trackID = record.trackid;
+		this.start_ts = record.ts[0];
+		this.stop_ts = record.ts[record.ts.length-1];
+		this.delay = record.ts[record.ts.length-1] - record.ts[0];
+	}
+	
+	
+	/**
+	 * Unique Id
+	 */
+	@Id
+	private int uid;
 
-    public int getUid() {
-        return uid;
-    }
+	@Column
+	private int trackID;
 
-    public void setUid(int uid) {
-        this.uid = uid;
-    }
+	@Column
+	private long start_ts;
 
-    public int getTrackID() {
-        return trackID;
-    }
+	@Column
+	private long stop_ts;
 
-    public void setTrackID(int trackID) {
-        this.trackID = trackID;
-    }
-    
-    public long getRuleID() {
-        return ruleID;
-    }
-    
-    public void setRuleID(long ruleID) {
-        this.ruleID = ruleID;
-    }
+	@Column
+	private long delay;
 
-    public long getStart_ts() {
-        return start_ts;
-    }
+	
+	public int getUid() {
+		return uid;
+	}
 
-    public void setStart_ts(long start_ts) {
-        this.start_ts = start_ts;
-    }
+	public void setUid(int uid) {
+		this.uid = uid;
+	}
 
-    public long getStop_ts() {
-        return stop_ts;
-    }
+	public int getTrackID() {
+		return trackID;
+	}
 
-    public void setStop_ts(long stop_ts) {
-        this.stop_ts = stop_ts;
-    }
+	public void setTrackID(int trackID) {
+		this.trackID = trackID;
+	}
 
-    public long getDelay() {
-        return delay;
-    }
+	public long getStart_ts() {
+		return start_ts;
+	}
 
-    public void setDelay(long delay) {
-        this.delay = delay;
-    }
+	public void setStart_ts(long start_ts) {
+		this.start_ts = start_ts;
+	}
+
+	public long getStop_ts() {
+		return stop_ts;
+	}
+
+	public void setStop_ts(long stop_ts) {
+		this.stop_ts = stop_ts;
+	}
+
+	public long getDelay() {
+		return delay;
+	}
+
+	public void setDelay(long delay) {
+		this.delay = delay;
+	}
+	
+
+
+	
 }

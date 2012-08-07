@@ -40,150 +40,61 @@
  */
 package de.fhg.fokus.net.netview.control;
 
-import java.awt.EventQueue;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import de.fhg.fokus.net.netview.model.Model;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.jdesktop.application.Application;
-import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.fhg.fokus.net.netview.model.Model;
-import de.fhg.fokus.net.netview.model.db.TrackRepository;
-import de.fhg.fokus.net.netview.model.db.TrackRepository.EventType;
-import de.fhg.fokus.net.netview.model.ui.TabbedPaneModel;
-import de.fhg.fokus.net.netview.sys.NetViewConfig;
-import de.fhg.fokus.net.netview.view.ViewMain;
-import de.fhg.fokus.net.worldmap.layers.track.DefaultTrackPlayer;
-import de.fhg.fokus.net.worldmap.layers.track.TrackPlayer;
-import de.fhg.fokus.net.worldmap.util.EventSupport;
-
 /**
  * The main class of the application.
- * 
+ *
  * @author FhG-FOKUS NETwork Research
- * 
- * 
+ *
+ *
  */
 public final class MainController extends SingleFrameApplication {
     //==[ external services / utilities ]===
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
-    // configuration settings (loaded from NETVIEW_HOME/netview.xml)
-    private static NetViewConfig config;
-    //==[ sub-controllers  ]==
-    private MainTabbedPaneController tabbedPaneMainCtrl;
-    private TopToolBarController toolbarTopCtrl;
-    private MapController mapCtrl;
-    //	private Console console;
-    private TrackPlayer trackPlayer;
+
+    
     private DataSourcesController dataSourcesController;
     private Model model;
-    //	private CSPController cspCtrl;
+
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
 
     @Override
     protected void initialize(String[] args) {
         logger.debug("=== Initializing NetView === ");
-        config = new NetViewConfig(new File("."));
-        model = new Model(executor, config);
+        model = new Model();
     }
 
-    /**
-     * At startup create and show the main frame of the application.
-     */
+ 
     @Override
     protected void startup() {
-        // FIXME there should be a view init before show
-        show(new ViewMain(MainController.this));
 
-        // avoiding using AWT-Thread
         executor.execute(new Runnable() {
 
             @Override
             public void run() {
                 try {
                     initializeControllers();
-                    dataSourcesController.start();
-                    model.loadPreferences();
-
-                    EventQueue.invokeLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-
-                            getMainView().getBusyIconAnimator().start();
-
-                            getMainView().message("NetView initialized.", 7);
-                            scheduler.schedule(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    trackPlayer.start();
-                                    trackPlayer.updateStatus();
-                                }
-                            }, 2000, TimeUnit.MILLISECONDS);
-
-                        }
-                    });
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                 }
-                EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        getMainView().getBusyIconAnimator().stop();
-                    }
-                });
             }
         });
-//		show();
-
     }
 
-    /**
-     * Initialize controllers. Object dependencies are solved here and in the subsequent initialization
-     * methods. 
-     * 
-     * @throws RuntimeException if resources can't be found
-     */
+  
     private void initializeControllers() {
-        // starting up ..
-        final ViewMain view = getMainView();
-        if (view == null) {
-            String error = "could not get main view";
-            logger.error(error);
-            throw new RuntimeException(error);
-        }
-
-
-        final ResourceMap resourceMap = view.getResourceMap();
-        if (resourceMap == null) {
-            String error = "could not get resource map";
-            logger.error(error);
-            throw new RuntimeException(error);
-        }
-
-        //== 1. MainTabbedPane Controller  ==
-        initMainTabbedPaneController(view, resourceMap);
-
-        // == map controller ==
-        this.mapCtrl = new MapController(view, model, config);
-        this.mapCtrl.init();
-
-        // == Data sources controller
-        this.dataSourcesController = new DataSourcesController(view,
-                model,
-                executor);
+       
+        this.dataSourcesController = new DataSourcesController(executor, model);
         this.dataSourcesController.init();
 
         if (this.dataSourcesController != null) {
@@ -196,99 +107,8 @@ public final class MainController extends SingleFrameApplication {
             //logger.debug("DSC beim Model!");
         }
 
-
-        // == track player ==
-        initTrackPlayer(view);
-        model.getNodeStatsLayer().setTrackPlayer(getTrackPlayer());
-
-        //== . ToolBar Top Controller
-        initToolBarTopController(view, resourceMap);
-
     }
 
-    /**
-     * Initialize track player
-     * @param view
-     */
-    private void initTrackPlayer(final ViewMain view) {
-        final SimpleDateFormat iso8601s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S");
-        TrackRepository repo = model.getTrackRepository();
-        this.trackPlayer = new DefaultTrackPlayer(
-                mapCtrl.getWorldmap().getToolsLayer().getTrackPlayerPanel(),
-                model.getSplineLayer(), model.getTrackRepository(), scheduler);
-        // Attaching notification in for the user interface 
-        repo.addEventListener(EventType.LOADING_TRACKS_STARTED,
-                new EventSupport.EventListener<TrackRepository.EventData>() {
-
-                    public void onEvent(TrackRepository.EventData e) {
-                        view.getBusyIconAnimator().start();
-                        view.message(String.format("Loading packet tracks, interval: %s - %s", iso8601s.format(new Date(e.startTs)),
-                                iso8601s.format(new Date(e.stopTs))));
-                    }
-                ;
-        });
-		repo.addEventListener(EventType.LOADING_TRACKS_FINISHED,
-                new EventSupport.EventListener<TrackRepository.EventData>() {
-
-                    public void onEvent(TrackRepository.EventData e) {
-                        view.getBusyIconAnimator().stop();
-                        view.message(String.format("Finished loading %d (%d new) tracks in %d ms, interval: %s - %s",
-                                e.numberOfTracks,
-                                e.numberOfNewTracks,
-                                e.elapsedTime,
-                                iso8601s.format(new Date(e.startTs)),
-                                iso8601s.format(new Date(e.stopTs))));
-                        trackPlayer.updateStatus();
-                    }
-                ;
-        });
-		repo.addEventListener(EventType.LOADING_TRACKS_FAILED,
-                new EventSupport.EventListener<TrackRepository.EventData>() {
-
-                    public void onEvent(TrackRepository.EventData e) {
-                        view.getBusyIconAnimator().stop();
-                        view.message(String.format("Could not load packet tracks for interval: %s - %s",
-                                iso8601s.format(new Date(e.startTs)),
-                                iso8601s.format(new Date(e.stopTs))));
-                    }
-                ;
-        });
-		this.trackPlayer.init();
-    }
-
-    private void initMainTabbedPaneController(ViewMain view, ResourceMap resourceMap) {
-        TabbedPaneModel model = new TabbedPaneModel(view.getJTabbedPaneMain(), resourceMap);
-        tabbedPaneMainCtrl = new MainTabbedPaneController(model);
-        tabbedPaneMainCtrl.init();
-    }
-
-    /**
-     * Initializes toolbar top controller
-     *  - setup events
-     * @param view
-     * @param resourceMap
-     */
-    private void initToolBarTopController(final ViewMain view, ResourceMap resourceMap) {
-        //== Toolbar Top  ==
-
-        toolbarTopCtrl = new TopToolBarController(view, mapCtrl, tabbedPaneMainCtrl);
-        toolbarTopCtrl.init();
-
-    }
-
-    /**
-     * This method is to initialize the specified window by injecting resources.
-     * Windows shown in our application come fully initialized from the GUI
-     * builder, so this additional configuration is not needed.
-     */
-    @Override
-    protected void configureWindow(java.awt.Window root) {
-    }
-
-    /**
-     * A convenient static getter for the application instance.
-     * @return the instance of DesktopApplication2
-     */
     public static MainController getApplication() {
         return Application.getInstance(MainController.class);
     }
@@ -306,40 +126,12 @@ public final class MainController extends SingleFrameApplication {
     }
 
     @Override
-    public ViewMain getMainView() {
-
-        return (ViewMain) super.getMainView();
-    }
-
-    /**
-     * Shuts controllers down. The order in which controllers are stopped _is_ important and
-     * depends on who controllers of same level interacts with each other.
-     */
-    @Override
     protected void shutdown() {
         super.shutdown();
-
-        // view
-        getMainView().stop();
-
-        // controllers
-        trackPlayer.stop();
-        toolbarTopCtrl.stop();
-        tabbedPaneMainCtrl.stop();
-        mapCtrl.stop();
-
-        dataSourcesController.stop();
-        // model
-        model.savePreferences();
-
-        // system
+ 
         executor.shutdown();
         scheduler.shutdown();
 
 
-    }
-
-    public TrackPlayer getTrackPlayer() {
-        return this.trackPlayer;
     }
 }

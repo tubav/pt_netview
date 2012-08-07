@@ -36,7 +36,6 @@
     </repositories>
 
     <modules>
-        <module>worldmap</module>
         <module>netview</module>
     </modules>
 

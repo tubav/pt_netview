@@ -40,6 +40,9 @@
  */
 package de.fhg.fokus.net.netview.control;
 
+import de.fhg.fokus.net.netview.model.db.TrackRepository;
+import de.fhg.fokus.net.ptapi.PacketTrackRecord;
+import de.fhg.fokus.net.ptapi.PtProbeStats;
 import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
@@ -49,21 +52,12 @@ import java.net.SocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.fhg.fokus.net.netview.model.db.TrackRecordRepository;
-import de.fhg.fokus.net.worldmap.util.EventSupport;
-import de.fhg.fokus.net.ptapi.PacketTrackRecord;
-import de.fhg.fokus.net.ptapi.PtInterfaceStats;
-import de.fhg.fokus.net.ptapi.PtProbeLocation;
-import de.fhg.fokus.net.ptapi.PtProbeStats;
-import de.fhg.fokus.net.ptapi.PtBearerInformation;
-
 /**
  * Default packet track collector implementation
- * 
+ *
  * @author FhG-FOKUS NETwork Research
  *
  */
@@ -97,31 +91,24 @@ public class PacketTrackCollector {
             this.clientAddress = clientAddress;
         }
     }
-    private final EventSupport<PtcEventType, PtcEventData> eventSupport;
-    // sys
+
     private final ExecutorService executor;
-    private final TrackRecordRepository db;
+    private final TrackRepository db;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     // model
     private final List<Socket> clients = new CopyOnWriteArrayList<Socket>();
     private long numberOfRecords = 0;
     private long startedAt = 0;
 
-    public PacketTrackCollector(TrackRecordRepository db, ExecutorService executor) {
+    public PacketTrackCollector(TrackRepository db, ExecutorService executor) {
         this.executor = executor;
         this.db = db;
-        this.eventSupport = new EventSupport<PtcEventType, PtcEventData>(executor);
     }
 
-    /**
-     * Handle incoming clients
-     * 
-     * @param socket
-     */
     private void handleConnection(final Socket socket) {
         final SocketAddress remote = socket.getRemoteSocketAddress();
         clients.add(socket);
-        eventSupport.dispatch(PtcEventType.CLIENT_CONNECTED, new PtcEventData(remote));
+
         try {
             InputStream inStream = socket.getInputStream();
             ObjectInput inObjectStream = new ObjectInputStream(inStream);
@@ -134,14 +121,8 @@ public class PacketTrackCollector {
                     if (obj instanceof PacketTrackRecord) {
                         db.addPacketTrackRecord((PacketTrackRecord) obj);
                         numberOfRecords++;
-                    } else if (obj instanceof PtInterfaceStats) {
-                        db.addPtInterfaceStats((PtInterfaceStats) obj);
                     } else if (obj instanceof PtProbeStats) {
                         db.addPtProbeStats((PtProbeStats) obj);
-                    } else if (obj instanceof PtProbeLocation) {
-                        db.addPtProbeLocation((PtProbeLocation) obj);
-                    } else if (obj instanceof PtBearerInformation) {
-                        db.addBearerInformation((PtBearerInformation) obj);
                     } else {
                         logger.warn("Unexpected object of class " + obj.getClass() + " received.");
                     }
@@ -159,7 +140,6 @@ public class PacketTrackCollector {
                 logger.debug(e1.getMessage());
             }
             clients.remove(socket);
-            eventSupport.dispatch(PtcEventType.CLIENT_DISCONNECTED, new PtcEventData(remote));
         }
     }
     private ServerSocket serverSocket;
@@ -181,7 +161,7 @@ public class PacketTrackCollector {
 
     /**
      * Bind collector to a port
-     * 
+     *
      * @param port
      * @throws Exception
      */
@@ -191,21 +171,20 @@ public class PacketTrackCollector {
         try {
             serverSocket = new ServerSocket(port);
             startedAt = System.currentTimeMillis();
-            eventSupport.dispatch(PtcEventType.STARTED, null);
             while (shouldRun) {
                 final Socket client = serverSocket.accept();
-                executor.execute(new Runnable() {
+                executor.execute(
+                        new Runnable() {
 
-                    @Override
-                    public void run() {
-                        handleConnection(client);
-                    }
-                });
+                            @Override
+                            public void run() {
+                                handleConnection(client);
+                            }
+                        });
             }
         } catch (Exception e) {
             logger.debug(e.getMessage());
         } finally {
-            eventSupport.dispatch(PtcEventType.STOPPED, new PtcEventData());
             serverSocket = null;
         }
     }
@@ -238,24 +217,6 @@ public class PacketTrackCollector {
         } catch (Exception e) {
             logger.debug(e.getMessage());
         }
-    }
-
-    /**
-     * Remove event listener
-     * 
-     * @param evt
-     * @param lsn
-     */
-    public void addEventListener(PtcEventType evt, EventSupport.EventListener<PtcEventData> lsn) {
-        eventSupport.addEventListener(evt, lsn);
-    }
-
-    /**
-     * Add event listener;
-     * @param lsn
-     */
-    public void removeEventListener(EventSupport.EventListener<PtcEventData> lsn) {
-        eventSupport.removeEventListener(lsn);
     }
 
     public List<Socket> getClients() {
