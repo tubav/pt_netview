@@ -4,10 +4,12 @@
 	<groupId>de.fhg.fokus.net</groupId>
 	<artifactId>worldmap</artifactId>
 	<name>WorldMap</name>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.2</version>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
 	<licenses>
 		<license>
 			<name>GPL 2.0</name>
@@ -16,6 +18,7 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -55,17 +58,18 @@
 			<version>1.0</version>
 			<scope>compile</scope>
 		</dependency>
-	 <dependency>
-	  <groupId>org.apache.commons</groupId>
-	  <artifactId>commons-lang3</artifactId>
-	  <version>3.0</version>
-	 </dependency>
-	 <dependency>
-	  <groupId>net.java.balloontip</groupId>
-	  <artifactId>balloontip</artifactId>
-	  <version>1.2.1</version>
-	 </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.java.balloontip</groupId>
+			<artifactId>balloontip</artifactId>
+			<version>1.2.1</version>
+		</dependency>
 	</dependencies>
+
 	<build>
 		<resources>
 			<resource>
@@ -84,8 +88,8 @@
 					<include> **/*.properties </include>
 				</includes>
 			</resource>
-
 		</resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -102,4 +106,5 @@
 			</plugin>
 		</plugins>
 	</build>
+
 </project>
