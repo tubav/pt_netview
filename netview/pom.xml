@@ -4,35 +4,8 @@
 	<groupId>de.fhg.fokus.net</groupId>
 	<artifactId>netview</artifactId>
 	<name>NetView</name>
-	<version>1.0-SNAPSHOT-plain</version>
-	<repositories>
-		<repository>
-			<id>jboss.releases</id>
-			<name>JBoss releases</name>
-			<url>http://repository.jboss.org/maven2
-			</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-	<distributionManagement>
-		<repository>
-			<id>pt</id>
-			<url>${pt.releases.repo.url}</url> <!-- TODO: Enter the right url -->
-		</repository>
-		<snapshotRepository>
-			<id>pt</id>
-			<url>${pt.snapshots.repo.url}</url> <!-- TODO: Enter the right url -->
-		</snapshotRepository>
-		<site>
-			<id>pt-site</id>
-			<url>${pt.site.deploy.url}</url> <!-- TODO: Enter the right url -->
-		</site>
-	</distributionManagement>
+	<version>1.2-plain</version>
+
 	<build>
 		<resources>
 			<resource>
@@ -52,6 +25,7 @@
 				</includes>
 			</resource>
 		</resources>
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -86,11 +60,12 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>de.fhg.fokus.net</groupId>
 			<artifactId>pt-api</artifactId>
-			<version>1.1.2</version>
+			<version>1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -132,7 +107,8 @@
 	  <version>1.0</version>
 	 </dependency>
 	</dependencies>
-	 <reporting>
+
+	<reporting>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -151,7 +127,6 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.5</version>
 			</plugin>
-
 		</plugins>
 	</reporting>
 
