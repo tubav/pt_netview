@@ -22,3 +22,4 @@ nvhome-test/*
 target/
 target/*
 thumbs.db
+worldmap/.settings/org.eclipse.jdt.core.prefs
