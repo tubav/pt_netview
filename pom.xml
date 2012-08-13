@@ -12,6 +12,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>tubav-pt</id>
+            <name>tubav repository</name>
+            <url>https://services.av.tu-berlin.de/nexus/content/repositories/packettracking/</url>
+        </repository>
+        <snapshotRepository>
+            <id>pt-tubav</id>
+            <name>tubav repository</name>
+            <url>https://services.av.tu-berlin.de/nexus/content/repositories/packettracking/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <modules>
         <module>worldmap</module>
         <module>netview</module>
